@@ -61,7 +61,7 @@ APPLET_MAILBOX_ADDR = 0x20002040
 
 
 GPIO            = 0x400E1000
-FLASHCALW		= 0x400A0000
+FLASHCALW       = 0x400A0000
 
 logger = logging.getLogger("atenka")
 logger.setLevel(logging.WARN)
@@ -70,7 +70,7 @@ COMMANDS = {    # a.k.a builtin plugins.
     'info': None,
     'dump': None,
 
-  
+
     'del-plugin': None,
     'ls-plugins': None,
 }
@@ -117,32 +117,32 @@ class SingletonBase(object):
 class Module(SingletonBase):
     NAME = None
     EXTRAS = []
-    
+
     def __init__(self, samba):
         self.samba = samba
-    
-        
+
+
 class ModGPIO(Module):
- 
+
     NAME                = "GPIO"
     BASE_ADDRESS        = 0x400E1000
-    
+
     PA                  = 0
     PB                  = 1
     PC                  = 2
-    
+
     REGISTER_BLOCK_SIZE = 0x0200
-    
+
     SET_OFFSET          = 0x04
     CLEAR_OFFSET        = 0x08
     TOGGLE_OFFSET       = 0xc
-    
+
     REGISTERS = {
         "GPER":       GPIORegister(0x000, "GPIO Enable Register",                   None, ACC_RW, True),
         "PMR0":       GPIORegister(0x010, "Peripheral Mux Register 0",              None, ACC_RW, True),
         "PMR1":       GPIORegister(0x020, "Peripheral Mux Register 1",              None, ACC_RW, True),
         "PMR2":       GPIORegister(0x030, "Peripheral Mux Register 2",              None, ACC_RW, True),
-        "ODER":       GPIORegister(0x040, "Output Driver Enable Register",          None, ACC_RW, True), 
+        "ODER":       GPIORegister(0x040, "Output Driver Enable Register",          None, ACC_RW, True),
         "OVR":        GPIORegister(0x050, "Output Value Register",                  None, ACC_RW, True),
         "PVR":        GPIORegister(0x060, "Pin Value Register",                     None, ACC_RO, False),
         "PUER":       GPIORegister(0x070, "Pull-up Enable Register",                None, ACC_RW, True),
@@ -156,31 +156,31 @@ class ModGPIO(Module):
         "ODCR1":      GPIORegister(0x110, "Output Driving Capability Register 1",   None, ACC_RW, True),
         "OSRR0":      GPIORegister(0x130, "Output Slew Rate Register 0",            None, ACC_RW, True),
         "OSRR0T":     GPIORegister(0x13C, "Output Slew Rate Register 0",            None, ACC_WO, True),
-        "STER":       GPIORegister(0x160, "Schmitt Trigger Enable Register",        None, ACC_RW, True),        
+        "STER":       GPIORegister(0x160, "Schmitt Trigger Enable Register",        None, ACC_RW, True),
         "EVER":       GPIORegister(0x180, "Event Enable Register",                  None, ACC_RW, True),
         "PARAMETER":  GPIORegister(0x1F8, "Parameter Register",                     None, ACC_RO, False),
         "VERSION":    GPIORegister(0x1FC, "Version Register",                       None, ACC_RO, False),
     }
-     
+
     #def __init__(self):
     #    pass
-        
+
     def _baseAddress(self, instance):
         return ModGPIO.BASE_ADDRESS + (instance * ModGPIO.REGISTER_BLOCK_SIZE)
-     
+
     def _namecheck(self, reg):
         if reg not in ModGPIO.REGISTERS:
             raise RegisterNotDefinedError("Register '%s' does not exist." % reg)
-            
+
     def _extInterfaceCheck(self, reg):
         if not ModGPIO.REGISTERS[reg].extInterface:
             raise InterfaceNotSupportedError("Interface not supported by '%s'." % reg)
-     
+
     def read(self, inst, reg):
         self._namecheck(reg)
         baseAddr = self._baseAddress(inst) + ModGPIO.REGISTERS[reg].offset
         return self.samba.readLong(baseAddr)
-       
+
     def write(self, inst, reg, value):
         self._namecheck(reg)
         baseAddr = self._baseAddress(inst)
@@ -189,7 +189,7 @@ class ModGPIO(Module):
         self._namecheck(reg)
         self._extInterfaceCheck(reg)
         baseAddr = self._baseAddress(inst)
-               
+
     def clear(self, inst, reg, mask):
         self._namecheck(reg)
         self._extInterfaceCheck(reg)
@@ -199,31 +199,31 @@ class ModGPIO(Module):
         self._namecheck(reg)
         self._extInterfaceCheck(reg)
         baseAddr = self._baseAddress(inst)
-    
-    
+
+
 class ModFlash(Module):
     NAME = "FLASHCALW"
     BASE_ADDRESS = 0x400A0000
-    
+
     REGISTERS = {
         "FCR":      Register(0x00, "Flash Control Register", None),
-        "FCMD":     Register(0x04, "Flash Command Register", None), 
-        "FSR":      Register(0x08, "Flash Status Register", None), 
-        "FPR":      Register(0x0C, "Flash Parameter Register", "flashParameters"), 
-        "FVR":      Register(0x10, "Flash Version Register", None), 
+        "FCMD":     Register(0x04, "Flash Command Register", None),
+        "FSR":      Register(0x08, "Flash Status Register", None),
+        "FPR":      Register(0x0C, "Flash Parameter Register", "flashParameters"),
+        "FVR":      Register(0x10, "Flash Version Register", None),
         "FGPFRHI":  Register(0x14, "Flash General Purpose Fuse Register Hi", None),
-        "FGPFRLO":  Register(0x18, "Flash General Purpose Fuse Register Lo", None), 
-        "CTRL":     Register(0x408, "PicoCache Control Register", None), 
-        "SR":       Register(0x40C, "PicoCache Status Register", None), 
-        "MAINT0":   Register(0x420, "PicoCache Maintenance Register 0", None), 
-        "MAINT1":   Register(0x424, "PicoCache Maintenance Register 1", None), 
-        "MCFG":     Register(0x428, "PicoCache Monitor Configuration Register", None), 
-        "MEN":      Register(0x42C, "PicoCache Monitor Enable Register", None), 
-        "MCTRL":    Register(0x430, "PicoCache Monitor Control Register", None), 
-        "MSR":      Register(0x434, "PicoCache Monitor Status Register", None), 
+        "FGPFRLO":  Register(0x18, "Flash General Purpose Fuse Register Lo", None),
+        "CTRL":     Register(0x408, "PicoCache Control Register", None),
+        "SR":       Register(0x40C, "PicoCache Status Register", None),
+        "MAINT0":   Register(0x420, "PicoCache Maintenance Register 0", None),
+        "MAINT1":   Register(0x424, "PicoCache Maintenance Register 1", None),
+        "MCFG":     Register(0x428, "PicoCache Monitor Configuration Register", None),
+        "MEN":      Register(0x42C, "PicoCache Monitor Enable Register", None),
+        "MCTRL":    Register(0x430, "PicoCache Monitor Control Register", None),
+        "MSR":      Register(0x434, "PicoCache Monitor Status Register", None),
         "PVR":      Register(0x4FC, "PicoCache Version Register", None),
     }
-    
+
     def flashParameters(cls, value):
         PSZ = {
             0: "32 Byte",
@@ -238,19 +238,19 @@ class ModFlash(Module):
         FSZ = {
             0:  "4 Kbyte ",
             8:  "192 Kbyte",
-            1:  "8 Kbyte", 
+            1:  "8 Kbyte",
             9:  "256 Kbyte",
             2:  "16 Kbyte",
             10: "384 Kbyte",
-            3:  "32 Kbyte", 
+            3:  "32 Kbyte",
             11: "512 Kbyte",
-            4:  "48 Kbyte", 
+            4:  "48 Kbyte",
             12: "768 Kbyte",
-            5:  "64 Kbyte", 
+            5:  "64 Kbyte",
             13: "1024 Kbyte",
-            6:  "96 Kbyte", 
+            6:  "96 Kbyte",
             14: "2048 Kbyte",
-            7:  "128 Kbyte", 
+            7:  "128 Kbyte",
             15: "Reserved",
         }
         fsz = value & 0x000000ff
@@ -258,8 +258,8 @@ class ModFlash(Module):
         print "    Flash Size     :", FSZ.get(fsz, "Reserved")
         print "    Flash Page Size:", PSZ.get(psz, "*** UNKNOWN ***")
         print
-    
-    
+
+
 def dumpModule(samba, mod):
     print "Module:", mod.NAME
     print
@@ -270,7 +270,7 @@ def dumpModule(samba, mod):
     for k, reg in sorted(mod.REGISTERS.items(), key = lambda x: x[1][0]):
         value = samba.readLong(mod.BASE_ADDRESS + reg.offset)
         print "{:08X} {:10s}{:s}".format(GPIO + reg.offset, k, reg.description)
-        print "{:08X} {:032b}\n".format(value, value)  
+        print "{:08X} {:032b}\n".format(value, value)
         if reg.decoder:
             getattr(mod, reg.decoder)(value)
 
@@ -318,7 +318,7 @@ def main():
         op.print_help()
         exit(1)
     command = args[0].lower()
-    
+
     if command not in COMMANDS:
         print
         print "'%s' not recognized.\nValid commands are: %s" % (command, sorted(COMMANDS.keys()))
@@ -336,16 +336,16 @@ def main():
     smb = Samba(port)
     print "ChipID       : 0x%08x" % smb.chipId()
     cinfo = smb.chipInfo()
-    
-    
+
+
     data = smb.receiveFile(APPLET_ADDR, 255)
     print data
     #smb.sendFile(APPLET_ADDR, [x for x in range(256)])
-        #smb.sendFile(APPLET_ADDR, data)
-    #data = smb.receiveFile(APPLET_ADDR, 255)
-    #print data
+    smb.sendFile(APPLET_ADDR, data)
+    data = smb.receiveFile(APPLET_ADDR, 255)
+    print data
 
-    
+
     """
 
         LocalBaud.BaudRate = lpDCB->BaudRate;
@@ -361,17 +361,17 @@ def main():
                      NULL,
                      0
                      )
-    """    
+    """
 
 ##>>> import feedparser as fp
 ##>>> res=fp.parse("https://www.mikrocontroller.net/wikisoftware/api.php?hidebots=1&days=7&limit=50&action=feedrecentchanges&feedformat=atom")
-    
+
     print "Requested command: ", command
     print cinfo
-    
+
     data = smb.receiveFile(0x400E0740, 4)
     print [hex(x) for x in data]
-	
+
     #sr = smb.readLong(SRAM + 0x6000)
     #print hex(sr)
     #smb.writeLong(SRAM + 0x6000, 0xdeadaffe)
@@ -387,37 +387,37 @@ def main():
     print bin(sr)
     sr = smb.readLong(GPIO + 0x060)
     print bin(sr)
-    """ 
-    
+    """
+
     gpio = ModGPIO(smb)
     flash = ModFlash(smb)
     dumpModule(smb, gpio)
     dumpModule(smb, flash)
     #print "GPRE?", hex(gpio.read(ModGPIO.PA, "GPER"))
-    
+
     """
     Ich war natürlich auch erst einmal skeptisch, an der richtigen Addresse zu sein, aber
     bei wiederholten Aufrufen ändert sich z.B. stets PA00 (also XTAL), auch sonst sehen die
     Werte plausibel aus.
     """
-    
+
     """Aber es ist ja nicht so als könnte man bei SAM-BA nicht ein paar Teile abmontieren :-)
     Flash-Loader.
     """
-    
+
     """
                     NCN          SAM4
     UART_NCN_RX     28[TxD/out]  PA16[Tx/out]
     UART_NCN_TX     27[RxD/in]   PA15[Rx/in]
     """
-    
-    """
-
-
-
 
     """
-    
+
+
+
+
+    """
+
     """
     try:
         prim = Primitives(port)
