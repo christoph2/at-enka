@@ -63,7 +63,7 @@ class Port(object):
         return bytearray(data)
         
     def flush(self):
-        #self._port.flush()
+        self._port.flush()
         self._port.flushOutput()
         self._port.flushInput()
 
