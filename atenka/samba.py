@@ -40,31 +40,31 @@ TERM = '#\x0a'
 
 CHIP_ID_ADDR    = 0x400E0740
 EX_ID_ADDR      = 0x400E0744
-FLASH_USER_PAGE	= 0x00800000
-SERIAL_NUMBER 	= 0x0080020C	# 128bits.
+FLASH_USER_PAGE = 0x00800000
+SERIAL_NUMBER   = 0x0080020C    # 128bits.
 SRAM            = 0x20000000
 GPIO            = 0x400E1000
 
 # Base address of Flash Module.
-FLASHCALW		= 0x400A0000
+FLASHCALW               = 0x400A0000
 
 # Offsets.
-FCR		= 0x00 		# Flash Control Register.
-FCMD	= 0x04 		# Flash Command Register.
-FSR		= 0x08 		# Flash Status Register.
-FPR		= 0x0C 		# Flash Parameter Register.
-FVR		= 0x10 		# Flash Version Register.
-FGPFRHI	= 0x14 		# Flash General Purpose Fuse Register Hi.
-FGPFRLO	= 0x18 		# Flash General Purpose Fuse Register Lo.
-CTRL	= 0x408 	# PicoCache Control Register.
-SR		= 0x40C 	# PicoCache Status Register.
-MAINT0	= 0x420 	# PicoCache Maintenance Register 0.
-MAINT1	= 0x424 	# PicoCache Maintenance Register 1.
-MCFG	= 0x428 	# PicoCache Monitor Configuration Register.
-MEN		= 0x42C 	# PicoCache Monitor Enable Register.
-MCTRL	= 0x430 	# PicoCache Monitor Control Register.
-MSR		= 0x434 	# PicoCache Monitor Status Register.
-PVR		= 0x4FC 	# Version Register.
+FCR     = 0x00          # Flash Control Register.
+FCMD    = 0x04          # Flash Command Register.
+FSR     = 0x08          # Flash Status Register.
+FPR     = 0x0C          # Flash Parameter Register.
+FVR     = 0x10          # Flash Version Register.
+FGPFRHI = 0x14          # Flash General Purpose Fuse Register Hi.
+FGPFRLO = 0x18          # Flash General Purpose Fuse Register Lo.
+CTRL    = 0x408         # PicoCache Control Register.
+SR      = 0x40C         # PicoCache Status Register.
+MAINT0  = 0x420         # PicoCache Maintenance Register 0.
+MAINT1  = 0x424         # PicoCache Maintenance Register 1.
+MCFG    = 0x428         # PicoCache Monitor Configuration Register.
+MEN     = 0x42C         # PicoCache Monitor Enable Register.
+MCTRL   = 0x430         # PicoCache Monitor Control Register.
+MSR     = 0x434         # PicoCache Monitor Status Register.
+PVR     = 0x4FC         # Version Register.
 
 
 """
@@ -137,7 +137,7 @@ class Samba(object):
         data = ("%s" % MASKS[dlen][1]) % (value & MASKS[dlen][0])
         #print("%s%08X,%s%s" % (cmd, addr, data, TERM))
         self._port.write("%s%08X,%s%s" % (cmd, addr, data, TERM))
-        
+
     def writeCmdParams(self, cmd, *params):
         self._port.write("%s%s" % (cmd, TERM))
         for param in params:
@@ -171,11 +171,13 @@ class Samba(object):
 
     def readByte(self, addr):
         return self._readUnit(self.READ_OCTET, addr, 1)
-        
+
     def _write(self, addr, length, data):
+        print "Writing {0} bytes...".format(length)
         self._port.write("%s%08X,%08X%s" % (Samba.WRITE, addr, length, TERM))
         self._port.flush()
         self._port.write(data)
+        self._port.flush()
 
     def sendFile(self, addr, data):
         """
@@ -194,18 +196,18 @@ class Samba(object):
         dataOffsetTo = MAX_PAYLOAD
         for l in range(loops):
             dslice = data[dataOffsetFrom : dataOffsetTo]
-            
+
             self._write(addrOffset, MAX_PAYLOAD, dslice)
             #self._port.write("%s%08X,%08X%s" % (Samba.WRITE, addrOffset, MAX_PAYLOAD, TERM))
             #self._port.write(bytearray(dslice))
             #print "addr", addrOffset
-            
+
             addrOffset += MAX_PAYLOAD
             dataOffsetFrom = dataOffsetTo
             dataOffsetTo = dataOffsetFrom + MAX_PAYLOAD
         if bytesRemaining:
             dslice = data[dataOffsetFrom: dataOffsetFrom + bytesRemaining]
-            
+
             self._write(addrOffset, bytesRemaining, dslice)
             #self._port.write("%s%08X,%08X%s" % (Samba.WRITE, addrOffset, bytesRemaining, TERM))
             #self._port.write(dslice)
@@ -256,7 +258,7 @@ class Samba(object):
         AES     = 0x00000001
 
         chipId = self.chipId()
-        
+
         FriendlyNames = {
             0xAB0B0AE0: "ATSAM4LC8C",
             0xAB0A09E0: "ATSAM4LC4C",
@@ -411,21 +413,21 @@ class Samba(object):
         nvpsiz = (chipId & NVPSIZ) >> 8
         eproc = (chipId & EPROC) >> 5
         version = (chipId & VERSION)
-        
+
         if ext:
-            exid = self.exId()            
+            exid = self.exId()
             package = (exid & PACKAGE) >> 24
             lcd     = (exid & LCD) == LCD
             usbfull = (exid & USBFULL) == USBFULL
             usb     = (exid & USB) == USB
-            aes     = (exid & AES) == AES    
+            aes     = (exid & AES) == AES
         else:
             package = "*** Unknown ***"
             lcd = False
             usb = False
             usbfull = False
             aes = False
-            
+
 
         return DeviceCapabilities(friendlyName, NvpTypes.get(nvptyp, "*** Unknown ***"), Archs.get(arch, "*** Unknown ***"),
             SRamSizes.get(sramsiz, "*** Unknown ***"), NvpSizes.get(nvpsiz, "*** Unknown ***"), NvpSiz2s.get(nvpsiz2, "*** Unknown ***"),
